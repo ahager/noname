@@ -24,7 +24,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	flagName := string(path[2])
 
 	// debug
-	flag := Flag{flagName, true}
+	flag := Flag{flagName, false}
 
 	js, err := json.Marshal(flag)
 	if err != nil {
