@@ -3,6 +3,7 @@
     Class Flag {
 
         public static $log = [];
+        public static $config = [];
 
         public static function getClientConfig() {
             if (! isset($_COOKIE['flg-config'])) {
@@ -13,28 +14,36 @@
 
         public static function setClientConfig($json) {
 
-            $config = self::getClientConfig();
+            // self::$config = self::getClientConfig();
 
-            $config[$json['ClientId']]['ClientId'] = $json['ClientId'];
-            $config[$json['ClientId']][$json['Name']]['Name'] = $json['Name'];
-            $config[$json['ClientId']][$json['Name']]['Sticky'] = @$json['Sticky'];
-            $config[$json['ClientId']][$json['Name']]['Status'] = $json['Status'];
+            // self::$log[] = json_encode($config);
 
-            setcookie("flg-config", json_encode($config));
+            // $config[$json['ClientId']]['ClientId'] = $json['ClientId'];
+            self::$config[$json['ClientId']][$json['Name']]['Name'] = $json['Name'];
+            self::$config[$json['ClientId']][$json['Name']]['Sticky'] = $json['Sticky'];
+            self::$config[$json['ClientId']][$json['Name']]['Status'] = $json['Status'];
 
-            return $config;
+            // self::$log[] = json_encode($config);
+
+            setcookie("flg-config", json_encode(self::$config), time()+86400);
+
+            return self::$config;
         }
 
         protected static function request($flagName, $forcedStatus='') {
 
             $clientId = '';
-            if ($config = self::getClientConfig()) {
-                $clientId = key($config);
+            if (! self::$config) {
+                self::$config = self::getClientConfig();
             }
 
-            if(isset($config[$clientId][$flagName])
-                && isset($config[$clientId][$flagName]['Sticky']) && $config[$clientId][$flagName]['Sticky'] == 1) {
-                $forcedStatus = $config[$clientId][$flagName]['Status'];
+            if (self::$config) {
+                $clientId = key(self::$config);
+            }
+
+            if(isset(self::$config[$clientId][$flagName])
+                && isset(self::$config[$clientId][$flagName]['Sticky']) && self::$config[$clientId][$flagName]['Sticky'] == 1) {
+                $forcedStatus = self::$config[$clientId][$flagName]['Status'];
                 $url = "http://localhost:8080/flag/$flagName/$clientId/$forcedStatus";
             } else {
                 $url = "http://localhost:8080/flag/$flagName/$clientId";
@@ -54,6 +63,7 @@
             curl_close($handle);
 
             $json = json_decode($result, true);
+
             self::setClientConfig($json);
             return $json;
         }
