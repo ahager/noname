@@ -9,16 +9,13 @@ import (
   "crypto/md5"
   "encoding/hex"
   "io"
+  "github.com/go-redis/redis"
 )
-
-// create a flag
-// set a flag to active
-// set a flag to inactive
 
 
 type Flag struct {
   Name     string
-  Status   bool
+  Status   string
   ClientId string
 }
 
@@ -45,11 +42,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
     clientId := string(path[3])
     if clientId == "" {
         clientId = createClientId(r)
-        // fmt.Println(clientId)
     }
 
-	// debug
-	flag := Flag{flagName, false, clientId}
+	flag, err := checkFlag(flagName, clientId)
 
 	js, err := json.Marshal(flag)
 	if err != nil {
@@ -62,9 +57,33 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(clientId)
 }
 
+func checkFlag(flagName string, clientId string) (Flag, error) {
+	client := redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "", // no password set
+		DB:       0,  // use default DB
+	})
+
+	pong, err := client.Ping().Result()
+	fmt.Println(pong, err)
+	var flag Flag
+
+	flagVar := "flag-" + flagName
+
+	redisValue, err := client.Get(flagVar).Result()
+	if err == redis.Nil {
+		fmt.Println("flag does not exist")
+	} else if err != nil {
+		panic(err)
+	} else {
+		flag = Flag{flagVar, redisValue, clientId}
+	}
+	return flag, err
+}
+
 func main() {
 	fmt.Println("Listen on Port 8080")
 
-    http.HandleFunc("/flag/", handler)
-    http.ListenAndServe(":8080", nil)
+	http.HandleFunc("/flag/", handler)
+	http.ListenAndServe(":8080", nil)
 }

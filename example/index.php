@@ -50,20 +50,33 @@
     <title>FLGR Example File</title>
     <style>
         header, main, aside { box-sizing:border-box; font-family:Helvetica; font-size:48px; color:#fff; font-weight:bold; text-align:center; }
-        header { height:100px; background:#FF4C3B; margin:1%; }
+        header { height:100px; background:#0072BB; margin:1%; }
         main { float:left; height:400px; width:78%; background:#0072BB; margin:1%; }
-        aside { float:right; height:400px; width:18%; background:#FF4C3B; margin:1%; }
+        aside { float:right; height:400px; width:18%; background:#0072BB; margin:1%; }
+
+        .inactive { background:#FF4C3B; }
     </style>
 </head>
 <body>
-    <?php if(Flag::isActive('my-hero')): ?>
+    <?php if(Flag::isActive('hero')): ?>
         <header>HERO</header>
+    <?php else: ?>
+        <header class="inactive">HERO</header>
     <?php endif; ?>
 
-    <main>MAIN CONTENT</main>
+    <main>
+        <p>MAIN CONTENT</p>
+        <?php if(Flag::isActive('disruptor')): ?>
+            <p>DISRUPTOR</p>
+        <?php else: ?>
+            <p class="inactive">DISRUPTOR</p>
+        <?php endif; ?>
+    </main>
 
-    <?php if(Flag::isActive('my-sidebar')): ?>
+    <?php if(Flag::isActive('sidebar')): ?>
         <aside>SIDEBAR</aside>
+    <?php else: ?>
+        <aside class="inactive">SIDEBAR</aside>
     <?php endif; ?>
 </body>
 </html>
