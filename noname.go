@@ -9,8 +9,8 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"strconv"
 	"strings"
-    "strconv"
 
 	"github.com/go-redis/redis"
 )
@@ -22,6 +22,13 @@ type Flag struct {
 	Sticky   string
 	Ratio    int
 }
+
+const (
+	GET    = "GET"
+	POST   = "POST"
+	PUT    = "PUT"
+	DELETE = "DELETE"
+)
 
 func createClientID(r *http.Request) string {
 	remoteAddr := r.RemoteAddr
@@ -35,6 +42,34 @@ func createClientID(r *http.Request) string {
 	io.WriteString(h, acceptLanguage)
 
 	return hex.EncodeToString(h.Sum(nil))
+}
+
+func mgmntHandler(w http.ResponseWriter, r *http.Request) {
+
+	r.ParseForm()
+	method := r.Method
+	w.Header().Set("Content-Type", "application/json")
+
+	switch method {
+	case GET:
+		mgmntGet()
+	case POST:
+		mgmntCreate()
+	case PUT:
+		mgmntUpdate()
+	case DELETE:
+		mgmntDelete()
+	default:
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	js, err := json.Marshal(method)
+	if err != nil {
+		log.Fatal(err)
+	}
+	w.Write(js)
+
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
@@ -116,16 +151,17 @@ func checkFlag(flagName string, clientId string) (Flag, error) {
 	var flag Flag
 
 	flagVar := "flag-" + flagName
-    redisMap, err := client.HGetAll(flagVar).Result()
+	redisMap, err := client.HGetAll(flagVar).Result()
 
 	if err == redis.Nil {
 		fmt.Println("flag does not exist")
 	} else if err != nil {
 		panic(err)
 	} else {
-        ratio, err := strconv.Atoi(redisMap["ratio"])
-        if err != nil {}
-        flag = Flag{flagName, redisMap["status"], clientId, redisMap["sticky"], ratio}
+		ratio, err := strconv.Atoi(redisMap["ratio"])
+		if err != nil {
+		}
+		flag = Flag{flagName, redisMap["status"], clientId, redisMap["sticky"], ratio}
 	}
 
 	return flag, err
@@ -147,5 +183,23 @@ func main() {
 	fmt.Println("Listen on Port 8080")
 
 	http.HandleFunc("/flag/", handler)
+	http.HandleFunc("/mgmnt/", mgmntHandler)
+
 	http.ListenAndServe(":8080", nil)
+}
+
+func mgmntGet() {
+
+}
+
+func mgmntCreate() {
+
+}
+
+func mgmntUpdate() {
+
+}
+
+func mgmntDelete() {
+
 }
