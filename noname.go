@@ -46,8 +46,12 @@ func createClientID(r *http.Request) string {
 
 func mgmntHandler(w http.ResponseWriter, r *http.Request) {
 
-	r.ParseForm()
 	method := r.Method
+	err := r.ParseForm()
+	if err != nil {
+		panic(err)
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 
 	path := strings.Split(r.URL.Path, "/")
@@ -57,7 +61,7 @@ func mgmntHandler(w http.ResponseWriter, r *http.Request) {
 	case GET:
 		mgmntGet()
 	case POST:
-		mgmntCreate()
+		mgmntCreate(r)
 	case PUT:
 		mgmntUpdate()
 	case DELETE:
@@ -119,35 +123,34 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	//fmt.Println(clientID)
 }
 
-
 func writeFlag(flag Flag) {
 
-    client := redis.NewClient(&redis.Options{
-        Addr:     "localhost:6379",
-        Password: "", // no password set
-        DB:       0,  // use default DB
-    })
+	client := redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "", // no password set
+		DB:       0,  // use default DB
+	})
 
-    // var fields map[string]interface{}
-    var fields map[string]interface{}
-    fields = make(map[string]interface{})
+	// var fields map[string]interface{}
+	var fields map[string]interface{}
+	fields = make(map[string]interface{})
 
-    fields["Ratio"] = strconv.Itoa(flag.Ratio)
-    fields["Status"] = flag.Status
-    fields["Sticky"] = flag.Sticky
+	fields["Ratio"] = strconv.Itoa(flag.Ratio)
+	fields["Status"] = flag.Status
+	fields["Sticky"] = flag.Sticky
+	flag.Name = "flag-" + strings.ToLower(flag.Name)
 
-    result := client.HMSet(flag.Name, fields)
-    fmt.Println(result)
+	client.HMSet(flag.Name, fields)
+	//fmt.Println(result)
 }
-
 
 func checkFlag(flagName string, clientId string) (Flag, error) {
 
-    client := redis.NewClient(&redis.Options{
-        Addr:     "localhost:6379",
-        Password: "", // no password set
-        DB:       0,  // use default DB
-    })
+	client := redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "", // no password set
+		DB:       0,  // use default DB
+	})
 
 	//pong, err := client.Ping().Result()
 	//fmt.Println(pong, err)
@@ -174,14 +177,14 @@ func checkFlag(flagName string, clientId string) (Flag, error) {
 
 func main() {
 
-    /* client := redis.NewClient(&redis.Options{
-        Addr:     "localhost:6379",
-        Password: "", // no password set
-        DB:       0,  // use default DB
-    }) */
+	/* client := redis.NewClient(&redis.Options{
+	    Addr:     "localhost:6379",
+	    Password: "", // no password set
+	    DB:       0,  // use default DB
+	}) */
 
-    flag := Flag{ "Oida", "1", "", "1", 75 }
-    writeFlag(flag)
+	flag := Flag{"Oida", "1", "", "1", 75}
+	writeFlag(flag)
 
 	fmt.Println("Listen on Port 8080")
 
@@ -194,8 +197,20 @@ func main() {
 func mgmntGet() {
 
 }
+func mgmntCreate(r *http.Request) {
+	fmt.Println(r.Body)
 
-func mgmntCreate() {
+	name := r.FormValue("Name")
+	status := r.FormValue("Status")
+	sticky := r.FormValue("Sticky")
+	ratio := r.FormValue("Ratio")
+
+	ratioValue, err := strconv.Atoi(ratio)
+	if err != nil {
+	}
+
+	flag := Flag{name, status, "", sticky, ratioValue}
+	writeFlag(flag)
 
 }
 
