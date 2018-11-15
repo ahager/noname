@@ -2,6 +2,7 @@
 
     Class Flag {
 
+        public static $log = [];
 
         public static function getClientConfig() {
             if (! isset($_COOKIE['flg-config'])) {
@@ -38,6 +39,8 @@
             } else {
                 $url = "http://localhost:8080/flag/$flagName/$clientId";
             }
+
+            self::$log[] = $url;
 
             $handle = curl_init();
             curl_setopt($handle, CURLOPT_URL, $url);
@@ -102,5 +105,12 @@
     <?php else: ?>
         <aside class="inactive">SIDEBAR</aside>
     <?php endif; ?>
+
+
+    <div style="clear:both">
+        <?php var_dump(Flag::getClientConfig()); ?>
+        <hr>
+        <?php var_dump(Flag::$log); ?>
+    </div>
 </body>
 </html>
