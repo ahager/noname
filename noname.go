@@ -16,7 +16,7 @@ import (
 
 type Flag struct {
 	Name   string
-	Status bool
+	Status string
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
@@ -25,7 +25,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	flagName := string(path[2])
 
 	// debug
-	flag := Flag{flagName, false}
+	flag, err := checkFlag(flagName)
 
 	js, err := json.Marshal(flag)
 	if err != nil {
@@ -38,7 +38,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(string(js))
 }
 
-func checkFlag(flagName string) {
+func checkFlag(flagName string) (Flag, error) {
 	client := redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",
 		Password: "", // no password set
@@ -47,11 +47,24 @@ func checkFlag(flagName string) {
 
 	pong, err := client.Ping().Result()
 	fmt.Println(pong, err)
+	var flag Flag
+
+	flagVar := "flag-" + flagName
+
+	redisValue, err := client.Get(flagVar).Result()
+	if err == redis.Nil {
+		fmt.Println("flag does not exist")
+	} else if err != nil {
+		panic(err)
+	} else {
+		flag = Flag{flagVar, redisValue}
+	}
+	return flag, err
 }
 
 func main() {
 	fmt.Println("Listen on Port 8080")
 
-	http.HandleFunc("/f/", handler)
+	http.HandleFunc("/flag/", handler)
 	http.ListenAndServe(":8080", nil)
 }

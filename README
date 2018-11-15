@@ -2,6 +2,11 @@ Install with...
  brew install redis
  redis-server /usr/local/etc/redis.conf
  redis-cli ping
+ open redis-cli, enter
+ set flag-disruptor 1
+ set flag-test 0
+ set flag-sidebar 1
+ set flag-hero 1
 
 
 Run with ...
