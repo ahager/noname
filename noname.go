@@ -1,21 +1,22 @@
 package main
 
 import (
-  "fmt"
-  "encoding/json"
-  "net/http"
-  "strings"
-  "log"
+	"encoding/json"
+	"fmt"
+	"log"
+	"net/http"
+	"strings"
+
+	"github.com/go-redis/redis"
 )
 
 // create a flag
 // set a flag to active
 // set a flag to inactive
 
-
 type Flag struct {
-  Name   string
-  Status bool
+	Name   string
+	Status bool
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
@@ -37,9 +38,20 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(string(js))
 }
 
+func checkFlag(flagName string) {
+	client := redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "", // no password set
+		DB:       0,  // use default DB
+	})
+
+	pong, err := client.Ping().Result()
+	fmt.Println(pong, err)
+}
+
 func main() {
 	fmt.Println("Listen on Port 8080")
 
-    http.HandleFunc("/flag/", handler)
-    http.ListenAndServe(":8080", nil)
+	http.HandleFunc("/f/", handler)
+	http.ListenAndServe(":8080", nil)
 }
