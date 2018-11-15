@@ -89,7 +89,7 @@ func checkFlag(flagName string, clientId string) (Flag, error) {
 	} else if err != nil {
 		panic(err)
 	} else {
-		flag = Flag{flagVar, redisValue, clientId, "1", 80}
+		flag = Flag{flagName, redisValue, clientId, "1", 80}
 	}
 	return flag, err
 }
