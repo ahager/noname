@@ -2,17 +2,44 @@
 
     Class Flag {
 
-        public static function clientId() {
-            if (isset($_COOKIE['flg-id'])) {
-                return $_COOKIE['flg-id'];
+
+        public static function getClientConfig() {
+            if (! isset($_COOKIE['flg-config'])) {
+                return [];
             }
-            return '';
+            return json_decode($_COOKIE['flg-config'], true);
         }
 
-        protected static function request($flagName, $clientId) {
+        public static function setClientConfig($json) {
+
+            $config = self::getClientConfig();
+
+            $config[$json['ClientId']]['ClientId'] = $json['ClientId'];
+            $config[$json['ClientId']][$json['Name']]['Name'] = $json['Name'];
+            $config[$json['ClientId']][$json['Name']]['Sticky'] = @$json['Sticky'];
+            $config[$json['ClientId']][$json['Name']]['Status'] = $json['Status'];
+
+            setcookie("flg-config", json_encode($config));
+
+            return $config;
+        }
+
+        protected static function request($flagName, $forcedStatus='') {
+
+            $clientId = '';
+            if ($config = self::getClientConfig()) {
+                $clientId = key($config);
+            }
+
+            if(isset($config[$clientId][$flagName])
+                && isset($config[$clientId][$flagName]['Sticky']) && $config[$clientId][$flagName]['Sticky'] == 1) {
+                $forcedStatus = $config[$clientId][$flagName]['Status'];
+                $url = "http://localhost:8080/flag/$flagName/$clientId/$forcedStatus";
+            } else {
+                $url = "http://localhost:8080/flag/$flagName/$clientId";
+            }
 
             $handle = curl_init();
-            $url = "http://localhost:8080/flag/$flagName/$clientId";
             curl_setopt($handle, CURLOPT_URL, $url);
             curl_setopt($handle, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
             curl_setopt($handle, CURLOPT_HTTPHEADER, [
@@ -24,20 +51,17 @@
             curl_close($handle);
 
             $json = json_decode($result, true);
-            if (isset($json['clientId'])) {
-                setcookie("flg-id", $json['clientId']);
-            }
-
+            self::setClientConfig($json);
             return $json;
         }
 
         public static function isActive($flagName) {
-            $result = self::request($flagName, self::clientId());
+            $result = self::request($flagName);
             return $result['Status'] == true;
         }
 
         public static function isInactive($flagName) {
-            $result = self::request($flagName, self::clientId());
+            $result = self::request($flagName);
             return $result['Status'] == false;
         }
     }
