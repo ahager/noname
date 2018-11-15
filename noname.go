@@ -50,6 +50,9 @@ func mgmntHandler(w http.ResponseWriter, r *http.Request) {
 	method := r.Method
 	w.Header().Set("Content-Type", "application/json")
 
+	path := strings.Split(r.URL.Path, "/")
+	flagName := string(path[2])
+
 	switch method {
 	case GET:
 		mgmntGet()
@@ -58,7 +61,7 @@ func mgmntHandler(w http.ResponseWriter, r *http.Request) {
 	case PUT:
 		mgmntUpdate()
 	case DELETE:
-		mgmntDelete()
+		mgmntDelete(flagName)
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
@@ -165,6 +168,14 @@ func mgmntUpdate() {
 
 }
 
-func mgmntDelete() {
+func mgmntDelete(flagName string) {
+	client := redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "", // no password set
+		DB:       0,  // use default DB
+	})
+
+	flagVar := "flag-" + flagName
+	client.Del(flagVar)
 
 }
