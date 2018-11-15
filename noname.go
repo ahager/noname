@@ -1,50 +1,63 @@
 package main
 
 import (
-  "fmt"
-  "encoding/json"
-  "net/http"
-  "strings"
-  "log"
-  "crypto/md5"
-  "encoding/hex"
-  "io"
-  "github.com/go-redis/redis"
+	"crypto/md5"
+	"encoding/hex"
+	"encoding/json"
+	"fmt"
+	"io"
+	"log"
+	"math/rand"
+	"net/http"
+	"strings"
+
+	"github.com/go-redis/redis"
 )
 
-
 type Flag struct {
-  Name     string
-  Status   string
-  ClientId string
+	Name     string
+	Status   string
+	ClientId string
+	Sticky   string
+	Ratio    int
 }
 
-func createClientId(r *http.Request) string {
-    remoteAddr := r.RemoteAddr
-    userAgent := r.Header.Get("User-Agent")
-    acceptLanguage := r.Header.Get("Accept-Language")
-    // remoteAddr := r.Header.Get("X-FORWARDED-FOR")
+func createClientID(r *http.Request) string {
+	remoteAddr := r.RemoteAddr
+	userAgent := r.Header.Get("User-Agent")
+	acceptLanguage := r.Header.Get("Accept-Language")
+	// remoteAddr := r.Header.Get("X-FORWARDED-FOR")
 
-    h := md5.New()
-    io.WriteString(h, remoteAddr)
-    io.WriteString(h, userAgent)
-    io.WriteString(h, acceptLanguage)
+	h := md5.New()
+	io.WriteString(h, remoteAddr)
+	io.WriteString(h, userAgent)
+	io.WriteString(h, acceptLanguage)
 
-    return hex.EncodeToString(h.Sum(nil))
+	return hex.EncodeToString(h.Sum(nil))
 }
-
 
 func handler(w http.ResponseWriter, r *http.Request) {
 
 	path := strings.Split(r.URL.Path, "/")
 	flagName := string(path[2])
 
-    clientId := string(path[3])
-    if clientId == "" {
-        clientId = createClientId(r)
-    }
+	clientID := string(path[3])
+	if clientID == "" {
+		clientID = createClientID(r)
+	}
 
-	flag, err := checkFlag(flagName, clientId)
+	flag, err := checkFlag(flagName, clientID)
+
+	num := rand.Intn(100)
+
+	fmt.Println(flag.Status)
+	fmt.Println(num)
+
+	if flag.Status == "1" {
+		if num > flag.Ratio {
+			flag.Status = "0"
+		}
+	}
 
 	js, err := json.Marshal(flag)
 	if err != nil {
@@ -54,7 +67,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(js)
 
-	fmt.Println(clientId)
+	//fmt.Println(clientID)
 }
 
 func checkFlag(flagName string, clientId string) (Flag, error) {
@@ -64,8 +77,8 @@ func checkFlag(flagName string, clientId string) (Flag, error) {
 		DB:       0,  // use default DB
 	})
 
-	pong, err := client.Ping().Result()
-	fmt.Println(pong, err)
+	//pong, err := client.Ping().Result()
+	//fmt.Println(pong, err)
 	var flag Flag
 
 	flagVar := "flag-" + flagName
@@ -76,7 +89,7 @@ func checkFlag(flagName string, clientId string) (Flag, error) {
 	} else if err != nil {
 		panic(err)
 	} else {
-		flag = Flag{flagVar, redisValue, clientId}
+		flag = Flag{flagVar, redisValue, clientId, "1", 80}
 	}
 	return flag, err
 }
