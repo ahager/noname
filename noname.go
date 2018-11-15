@@ -46,17 +46,27 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		clientID = createClientID(r)
 	}
 
+	var forcedState string
+	if len(path) == 5 {
+		forcedState = string(path[4])
+	}
+
 	flag, err := checkFlag(flagName, clientID)
 
 	num := rand.Intn(100)
 
-	fmt.Println(flag.Status)
-	fmt.Println(num)
+	//fmt.Println(flag.Status)
+	//fmt.Println(num)
 
 	if flag.Status == "1" {
-		if num > flag.Ratio {
-			flag.Status = "0"
+		if forcedState != "" {
+			flag.Status = forcedState
+		} else {
+			if num > flag.Ratio {
+				flag.Status = "0"
+			}
 		}
+
 	}
 
 	js, err := json.Marshal(flag)
