@@ -10,6 +10,7 @@ import (
 	"math/rand"
 	"net/http"
 	"strings"
+    "strconv"
 
 	"github.com/go-redis/redis"
 )
@@ -82,15 +83,18 @@ func checkFlag(flagName string, clientId string) (Flag, error) {
 	var flag Flag
 
 	flagVar := "flag-" + flagName
+    redisMap, err := client.HGetAll(flagVar).Result()
 
-	redisValue, err := client.Get(flagVar).Result()
 	if err == redis.Nil {
 		fmt.Println("flag does not exist")
 	} else if err != nil {
 		panic(err)
 	} else {
-		flag = Flag{flagName, redisValue, clientId, "1", 80}
+        ratio, err := strconv.Atoi(redisMap["ratio"])
+        if err != nil {}
+        flag = Flag{flagName, redisMap["status"], clientId, redisMap["sticky"], ratio}
 	}
+
 	return flag, err
 }
 

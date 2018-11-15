@@ -1,13 +1,18 @@
 Install with...
- brew install redis
- redis-server /usr/local/etc/redis.conf
- redis-cli ping
- open redis-cli, enter
- set flag-disruptor 1
- set flag-test 0
- set flag-sidebar 1
- set flag-hero 1
 
+brew install redis
+redis-server /usr/local/etc/redis.conf
+redis-cli ping
+open redis-cli, enter
+
+DEL flag-disruptor
+DEL flag-test
+DEL flag-sidebar
+DEL flag-hero
+HMSET flag-disruptor status 1 ratio 100 sticky 1
+HMSET flag-test status 0 ratio 50 sticky 0
+HMSET flag-sidebar status 1 ratio 50 sticky 1
+HMSET flag-hero status 0 ratio 50 sticky 1
 
 Run with ...
 go run noname.go
