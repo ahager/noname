@@ -73,7 +73,7 @@ func mgmntGet() []byte {
 		ratio, err := strconv.Atoi(flagValues["ratio"])
 		if err != nil {
 		}
-		flag := models.Flag{val, flagValues["status"], "", flagValues["sticky"], ratio}
+		flag := models.Flag{val, flagValues["status"], flagValues["sticky"], ratio}
 		flagArr = append(flagArr, flag)
 	}
 
