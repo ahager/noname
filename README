@@ -1,21 +1,16 @@
 Install with...
-
 brew install redis
 redis-server /usr/local/etc/redis.conf
 redis-cli ping
-open redis-cli, enter
-
-DEL flag-disruptor
-DEL flag-test
-DEL flag-sidebar
-DEL flag-hero
-HMSET flag-disruptor status 1 ratio 100 sticky 1
-HMSET flag-test status 0 ratio 50 sticky 0
-HMSET flag-sidebar status 1 ratio 50 sticky 0
-HMSET flag-hero status 0 ratio 50 sticky 1
 
 Run with ...
 go run noname.go
 
 Run php test site ...
 php -S localhost:9090/index.php
+
+Fill test data ...
+
+curl -X POST http://127.0.0.1:8080/mgmnt/ -H 'Content-Type: application/x-www-form-urlencoded' -d 'name=hero&sticky=0&ratio=0&status=0'
+curl -X POST http://127.0.0.1:8080/mgmnt/ -H 'Content-Type: application/x-www-form-urlencoded' -d 'name=sidebar&sticky=0&ratio=0&status=0'
+curl -X POST http://127.0.0.1:8080/mgmnt/ -H 'Content-Type: application/x-www-form-urlencoded' -d 'name=disruptor&sticky=0&ratio=0&status=0'

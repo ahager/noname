@@ -19,9 +19,9 @@
             // self::$log[] = json_encode($config);
 
             // $config[$json['ClientId']]['ClientId'] = $json['ClientId'];
-            self::$config[$json['ClientId']][$json['Name']]['Name'] = $json['Name'];
-            self::$config[$json['ClientId']][$json['Name']]['Sticky'] = $json['Sticky'];
-            self::$config[$json['ClientId']][$json['Name']]['Status'] = $json['Status'];
+            self::$config[$json['clientId']][$json['name']]['name'] = $json['name'];
+            self::$config[$json['clientId']][$json['name']]['sticky'] = $json['sticky'];
+            self::$config[$json['clientId']][$json['name']]['status'] = $json['status'];
 
             // self::$log[] = json_encode($config);
 
@@ -42,8 +42,8 @@
             }
 
             if(isset(self::$config[$clientId][$flagName])
-                && isset(self::$config[$clientId][$flagName]['Sticky']) && self::$config[$clientId][$flagName]['Sticky'] == 1) {
-                $forcedStatus = self::$config[$clientId][$flagName]['Status'];
+                && isset(self::$config[$clientId][$flagName]['sticky']) && self::$config[$clientId][$flagName]['sticky'] == 1) {
+                $forcedStatus = self::$config[$clientId][$flagName]['status'];
                 $url = "http://localhost:8080/flag/$flagName/$clientId/$forcedStatus";
             } else {
                 $url = "http://localhost:8080/flag/$flagName/$clientId";
@@ -70,12 +70,12 @@
 
         public static function isActive($flagName) {
             $result = self::request($flagName);
-            return $result['Status'] == true;
+            return $result['status'] == true;
         }
 
         public static function isInactive($flagName) {
             $result = self::request($flagName);
-            return $result['Status'] == false;
+            return $result['status'] == false;
         }
     }
 
