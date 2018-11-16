@@ -44,7 +44,10 @@ func FlagHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	js, err := json.Marshal(flag)
+    jsonResponse := JsonResponse{flagName, flag.Status, flag.Sticky, flag.Ratio, clientID}
+    js, err := json.Marshal(jsonResponse)
+
+	// js, err := json.Marshal(flag)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -67,7 +70,7 @@ func checkFlag(flagName string, clientId string) (models.Flag, error) {
 		if err != nil {
             // panic(err)
         }
-		flag = models.Flag{flagName, redisMap["status"], clientId, redisMap["sticky"], ratio}
+		flag = models.Flag{flagName, redisMap["status"], redisMap["sticky"], ratio}
 	}
 
 	return flag, err

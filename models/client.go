@@ -7,6 +7,16 @@ import (
     "net/http"
 )
 
+type Client struct {
+	Id         string
+	Agent      string
+	LastAccess string
+}
+
+func WriteClientLog(r *http.Request) {
+
+}
+
 func CreateClientId(r *http.Request) string {
 	remoteAddr := r.RemoteAddr
 	userAgent := r.Header.Get("User-Agent")
@@ -19,8 +29,4 @@ func CreateClientId(r *http.Request) string {
 	io.WriteString(h, acceptLanguage)
 
 	return hex.EncodeToString(h.Sum(nil))
-}
-
-func TestMethod() string {
-    return "oida"
 }
