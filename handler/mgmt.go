@@ -1,14 +1,14 @@
 package handler
 
 import (
-    "encoding/json"
+	"encoding/json"
 	"log"
 	"net/http"
 	"strconv"
 	"strings"
 
-    "fmt"
-    "noname/models"
+	"fmt"
+	"noname/models"
 )
 
 const (
@@ -20,39 +20,67 @@ const (
 
 func MgmtHandler(w http.ResponseWriter, r *http.Request) {
 
-    	method := r.Method
-    	err := r.ParseForm()
-    	if err != nil {
-    		panic(err)
-    	}
+	method := r.Method
+	err := r.ParseForm()
+	if err != nil {
+		panic(err)
+	}
 
-    	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json")
 
-    	path := strings.Split(r.URL.Path, "/")
-    	flagName := string(path[2])
+	path := strings.Split(r.URL.Path, "/")
+	flagName := string(path[2])
+	var content []byte
 
-    	switch method {
-    	case GET:
-    		mgmntGet()
-    	case POST:
-    		mgmntCreate(r)
-    	case PUT:
-    		mgmntUpdate()
-    	case DELETE:
-    		mgmntDelete(flagName)
-    	default:
-    		w.WriteHeader(http.StatusMethodNotAllowed)
-    		return
-    	}
+	switch method {
+	case GET:
+		content = mgmntGet()
+	case POST:
+		mgmntCreate(r)
+	case PUT:
+		mgmntUpdate()
+	case DELETE:
+		mgmntDelete(flagName)
+	default:
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
 
-    	js, err := json.Marshal(method)
-    	if err != nil {
-    		log.Fatal(err)
-    	}
-    	w.Write(js)
+	//js, err := json.Marshal(method)
+	if err != nil {
+		log.Fatal(err)
+	}
+	w.Write(content)
 }
 
-func mgmntGet() {
+func mgmntGet() []byte {
+
+	flags := models.RedisClient.Keys("flag-*")
+	// scan the []interface{} slice into a []int slice
+	keys, err := flags.Result()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var flagArr []models.Flag
+
+	for _, val := range keys {
+		flagValues := models.RedisClient.HGetAll(val).Val()
+		fmt.Println("name: " + val)
+		fmt.Println("status: " + flagValues["status"])
+		fmt.Println("ratio: " + flagValues["ratio"])
+		fmt.Println("sticky: " + flagValues["sticky"])
+		ratio, err := strconv.Atoi(flagValues["ratio"])
+		if err != nil {
+		}
+		flag := models.Flag{val, flagValues["status"], "", flagValues["sticky"], ratio}
+		flagArr = append(flagArr, flag)
+	}
+
+	js, err := json.Marshal(flagArr)
+	if err == nil {
+	}
+	return js
 
 }
 
