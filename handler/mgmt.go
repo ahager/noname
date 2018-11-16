@@ -59,10 +59,10 @@ func mgmntGet() {
 func mgmntCreate(r *http.Request) {
 	fmt.Println(r.Body)
 
-	name := r.FormValue("Name")
-	status := r.FormValue("Status")
-	sticky := r.FormValue("Sticky")
-	ratio := r.FormValue("Ratio")
+	name := r.FormValue("name")
+	status := r.FormValue("status")
+	sticky := r.FormValue("sticky")
+	ratio := r.FormValue("ratio")
 
 	ratioValue, err := strconv.Atoi(ratio)
 	if err != nil {
@@ -87,9 +87,9 @@ func writeFlag(flag models.Flag) {
 	var fields map[string]interface{}
 	fields = make(map[string]interface{})
 
-	fields["Ratio"] = strconv.Itoa(flag.Ratio)
-	fields["Status"] = flag.Status
-	fields["Sticky"] = flag.Sticky
+	fields["ratio"] = strconv.Itoa(flag.Ratio)
+	fields["status"] = flag.Status
+	fields["sticky"] = flag.Sticky
 	flag.Name = "flag-" + strings.ToLower(flag.Name)
 
 	models.RedisClient.HMSet(flag.Name, fields)
