@@ -3,6 +3,7 @@ package handler
 import (
     "encoding/json"
 	"log"
+    // "fmt"
 	"math/rand"
 	"net/http"
 	"strconv"
@@ -60,11 +61,11 @@ func checkFlag(flagName string, clientId string) (models.Flag, error) {
 	redisMap, err := models.RedisClient.HGetAll(flagVar).Result()
 
 	if err != nil {
-		panic(err)
+		// panic(err)
 	} else {
 		ratio, err := strconv.Atoi(redisMap["ratio"])
 		if err != nil {
-            panic(err)
+            // panic(err)
         }
 		flag = models.Flag{flagName, redisMap["status"], clientId, redisMap["sticky"], ratio}
 	}
