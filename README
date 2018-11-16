@@ -16,3 +16,6 @@ HMSET flag-hero status 0 ratio 50 sticky 1
 
 Run with ...
 go run noname.go
+
+Run php test site ...
+php -S localhost:9090/index.php

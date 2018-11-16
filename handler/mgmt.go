@@ -96,7 +96,7 @@ func mgmntCreate(r *http.Request) {
 	if err != nil {
 	}
 
-	flag := models.Flag{name, status, "", sticky, ratioValue}
+	flag := models.Flag{name, status, sticky, ratioValue}
 	writeFlag(flag)
 }
 
