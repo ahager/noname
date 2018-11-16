@@ -86,12 +86,12 @@
     <meta charset="UTF-8">
     <title>FLGR Example File</title>
     <style>
-        header, main, aside { box-sizing:border-box; font-family:Helvetica; font-size:48px; color:#fff; font-weight:bold; text-align:center; }
-        header { height:100px; background:#0072BB; margin:1%; }
-        main { float:left; height:400px; width:78%; background:#0072BB; margin:1%; }
-        aside { float:right; height:400px; width:18%; background:#0072BB; margin:1%; }
+        header, main, aside { box-sizing:border-box; font-family: 'Helvetica Neue', Helvetica; font-size:48px; color:#fff; font-weight: 100; text-align:center; }
+        header { height:100px; background: linear-gradient(135deg, #7abcff 0%,#60abf8 44%,#4096ee 100%); margin:1%; display: flex; align-items: center; justify-content: center;}
+        main { float:left;  padding: 20px; height:400px; width:78%; background: linear-gradient(135deg, #7abcff 0%,#60abf8 44%,#4096ee 100%); margin:1%; }
+        aside { float:right; height:400px; width:18%; background: linear-gradient(135deg, #7abcff 0%,#60abf8 44%,#4096ee 100%); margin:1%;  display: flex; align-items: center; justify-content: center;}
 
-        .inactive { background:#FF4C3B; }
+        .inactive { background: linear-gradient(135deg, #f22929 1%,#ff4949 100%); }
     </style>
 </head>
 <body>
